@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
 import com.bmdb.business.JsonResponse;
@@ -21,7 +22,7 @@ public class MovieController {
 		JsonResponse jr = null;
 		List<Movie> movies = movieRepo.findAll();
 		if (movies.size()==0) {
-			jr = JsonResponse.getInstance("No movies found.");
+			jr = JsonResponse.getErrorInstance("No movies found.");
 		}
 		else {
 			jr = JsonResponse.getInstance(movies);
@@ -42,8 +43,59 @@ public class MovieController {
 			jr = JsonResponse.getInstance(movie.get());
 		}
 		else {
-			jr = JsonResponse.getInstance("No movie found for id: "+id);
+			jr = JsonResponse.getErrorInstance("No movie found for id: "+id);
 		}
+		return jr;
+	}
+	
+	// 'create' method
+	@PostMapping("/")
+	public JsonResponse createMovie(@RequestBody Movie m) {
+		JsonResponse jr = null;
+		
+		try {
+			m = movieRepo.save(m);
+			jr = JsonResponse.getInstance(m);
+		} 
+		catch (DataIntegrityViolationException dive) {
+			jr = JsonResponse.getErrorInstance(dive.getRootCause().getMessage());
+			dive.printStackTrace();
+		}
+		catch (Exception e) {
+			jr = JsonResponse.getErrorInstance("Error creating movie: "+e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return jr;
+	}
+	
+	@PutMapping("/")
+	public JsonResponse updateMovie(@RequestBody Movie m) {
+		JsonResponse jr = null;
+		
+		try {
+			m = movieRepo.save(m);
+			jr = JsonResponse.getInstance(m);
+		} catch (Exception e) {
+			jr = JsonResponse.getErrorInstance("Error updating movie: "+e.getMessage());
+			e.printStackTrace();
+		}
+		
+		return jr;
+	}
+	
+	@DeleteMapping("/{id}")
+	public JsonResponse deleteMovie(@PathVariable int id) {
+		JsonResponse jr = null;
+		
+		try {
+			movieRepo.deleteById(id);
+			jr = JsonResponse.getInstance(id);
+		} catch (Exception e) {
+			jr = JsonResponse.getErrorInstance("Error deleting movie: "+e.getMessage());
+			e.printStackTrace();
+		}
+		
 		return jr;
 	}
 	
