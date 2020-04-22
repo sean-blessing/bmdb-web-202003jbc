@@ -21,11 +21,11 @@ public class MovieController {
 	public JsonResponse list() {
 		JsonResponse jr = null;
 		List<Movie> movies = movieRepo.findAll();
-		if (movies.size()==0) {
-			jr = JsonResponse.getErrorInstance("No movies found.");
+		if (movies.size() > 0) {
+			jr = JsonResponse.getInstance(movies);			
 		}
 		else {
-			jr = JsonResponse.getInstance(movies);
+			jr = JsonResponse.getErrorInstance("No movies found.");
 		}
 		return jr;
 	}
@@ -90,7 +90,7 @@ public class MovieController {
 		
 		try {
 			movieRepo.deleteById(id);
-			jr = JsonResponse.getInstance(id);
+			jr = JsonResponse.getInstance("Movie id: "+id+" deleted successfully.");
 		} catch (Exception e) {
 			jr = JsonResponse.getErrorInstance("Error deleting movie: "+e.getMessage());
 			e.printStackTrace();
